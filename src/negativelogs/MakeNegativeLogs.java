@@ -1,9 +1,7 @@
 package negativelogs;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -32,75 +30,53 @@ import org.processmining.plugins.neconformance.trees.ukkonen.UkkonenLogTree;
 import org.processmining.plugins.neconformance.types.WeightedEventClass;
 import org.processmining.xeslite.external.XFactoryExternalStore;
 
+import experiment.DirectoryExperiment;
 import experiment.Globals;
 import experiment.Utils;
 
-public class MakeNegativeLogs {
-	public String inputLog, outputLog;
-	public int outputFormat = 2; // 0: traces with negev, 1: pos and neg traces, 2: neg traces
-	public boolean onlyUnique = true;
-	public boolean randomExtend = true;
-	public double inclusionChance = 1.0d;
-	public double ratioToPos = 1.0d;
-	public XEventClassifier classifier = XLogInfoImpl.STANDARD_CLASSIFIER;
-	public boolean useWeighted = false;
-	public boolean useCut = false;
-	public int winSize = 1;
-	public double weightThreshold = 0.0;
-	
-	private Random r = new Random();
-	private XLog log;
-	private XEventClasses eventClasses;
-	private GroupedXLog glog;
-	private Set<XEventClass> startingClasses;
-	private UkkonenLogTree logTree;
-	private LogTreeWeightedNegativeEventInducer inducer;
-
-	public static void main(final String... args) throws Exception {
+public class MakeNegativeLogs extends DirectoryExperiment {
+	public MakeNegativeLogs(File directory, String pattern, File outputDirectory, boolean skipIfExists) {
+		super(directory, pattern, outputDirectory, skipIfExists);
 		XFactoryRegistry.instance().setCurrentDefault(new XFactoryExternalStore.MapDBDiskImpl());
-		
-		for (File file : Utils.getDirectoryFiles(new File(Globals.poslogsdir), "\\.xes$")) {
-			System.out.println(file.getName());
-			MakeNegativeLogs ind = new MakeNegativeLogs();
-			ind.inputLog = file.getAbsolutePath();
-			ind.outputLog = Globals.neglogsdir + file.getName();
-			ind.onlyUnique = true;
-			ind.outputFormat = 2;
-			ind.useWeighted = true;
-			ind.useCut = true;
-			ind.randomExtend = true;
-			ind.winSize = -1;
-			ind.weightThreshold = .8D;
-			ind.run();
-		}
-	}
-	
-	public void run() throws Exception {
-		setup();
-		induce();
+		outputDirectory.mkdirs();
 	}
 
-	protected void setup() {
+	@Override
+	public void run(File file, File outputDirectory, File outputTxt) {
+		String outputLogPath = outputDirectory.getAbsolutePath() + "/" + Utils.replaceExtension(file.getName(), "xes");
+		
+		int outputFormat = 2;
+		boolean onlyUnique = true;
+		boolean randomExtend = true;
+		double inclusionChance = 1.0d;
+		double ratioToPos = 1.0d;
+		XEventClassifier classifier = XLogInfoImpl.STANDARD_CLASSIFIER;
+		boolean useWeighted = true;
+		boolean useCut = true;
+		int winSize = -1;
+		double weightThreshold = 0.8;
+
+		
+		Random r = new Random();
+		
 		System.out.println("Reading log...");
-		log = Utils.readLog(inputLog);
-		eventClasses = XEventClasses.deriveEventClasses(classifier, log);
-		glog = new GroupedXLog(log, classifier, false);
-		startingClasses = AbstractNegativeEventInducer.deriveStartingClasses(eventClasses, log);	
+		XLog log = Utils.readLog(file.getAbsolutePath());
+		XEventClasses eventClasses = XEventClasses.deriveEventClasses(classifier, log);
+		GroupedXLog glog = new GroupedXLog(log, classifier, false);
+		Set<XEventClass> startingClasses = AbstractNegativeEventInducer.deriveStartingClasses(eventClasses, log);	
 		
 		System.out.println("Building tree...");
-		logTree = new UkkonenLogTree(glog.getGroupedLog());
-		inducer = new LogTreeWeightedNegativeEventInducer(eventClasses, startingClasses, logTree);
+		UkkonenLogTree logTree = new UkkonenLogTree(glog.getGroupedLog());
+		LogTreeWeightedNegativeEventInducer inducer = new LogTreeWeightedNegativeEventInducer(eventClasses, startingClasses, logTree);
 		inducer.setReturnZeroEvents(false);
 		inducer.setUseWeighted(useWeighted);
 		inducer.setNegWindowSize(winSize);
 		inducer.setUseWindowOccurrenceCut(useCut);
-	}
 	
-	private void induce() throws Exception {
-		XLog outputLog = XFactoryRegistry.instance().currentDefault().createLog();
-		outputLog.clear();
 		
 		System.out.println("Inducing negatives...");
+		XLog outputLog = XFactoryRegistry.instance().currentDefault().createLog();
+		outputLog.clear();
 		
 		for (int tn = 0; tn < log.size(); tn++) {
 			if (tn % 100 == 0)
@@ -108,7 +84,7 @@ public class MakeNegativeLogs {
 			XTrace trace = log.get(tn);
 			List<Set<WeightedEventClass>> negatives = new ArrayList<>();
 			for (int position = 0; position < trace.size(); position++) {
-				Set<WeightedEventClass> negativesAtPos = getNegativeEvents(trace, position);
+				Set<WeightedEventClass> negativesAtPos = getNegativeEvents(trace, position, inducer, weightThreshold);
 				negatives.add(negativesAtPos);
 				if (outputFormat > 0) {
 					for (WeightedEventClass negative : negativesAtPos) {
@@ -134,7 +110,6 @@ public class MakeNegativeLogs {
 		}
 		
 		System.out.println("Saving file...");
-		
 		if (onlyUnique) {
 			System.out.println("Making uniques...");
 			outputLog = new GroupedXLog(outputLog).getGroupedLog();
@@ -149,30 +124,18 @@ public class MakeNegativeLogs {
 		}
 		
 		System.out.println("Saving " + outputLog.size() + " traces");
-		
-		if (this.outputLog.toLowerCase().endsWith(".sim")) {
-			Files.write(Paths.get(this.outputLog), new byte[]{}, 
-					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-			for (XTrace trace : outputLog) {
-				String line = "";
-				for (XEvent event : trace) {
-					line += " "+XConceptExtension.instance().extractName(event);
-					if (event.getAttributes().containsKey("negative:isnegative"))
-						line += "-";
-				}
-				line = line.substring(1)+"\n";
-				Files.write(Paths.get(this.outputLog), line.getBytes(), StandardOpenOption.APPEND);
-			}
-			
-		} else if (this.outputLog.toLowerCase().endsWith(".xes")) {
-			XSerializer ser = new XesXmlSerializer();
-			ser.serialize(outputLog, new FileOutputStream(this.outputLog));
+		XSerializer ser = new XesXmlSerializer();
+		try {
+			ser.serialize(outputLog, new FileOutputStream(outputLogPath));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 			
-		System.out.println("Done!");
 	}
 
-	private Set<WeightedEventClass> getNegativeEvents(XTrace trace, int position) {
+	private Set<WeightedEventClass> getNegativeEvents(XTrace trace, int position,
+			LogTreeWeightedNegativeEventInducer inducer,
+			double weightThreshold) {
 		Set<WeightedEventClass> negativesAtPos = inducer.getNegativeEvents(trace, position);
 		Iterator<WeightedEventClass> it = negativesAtPos.iterator();
 		while (it.hasNext()) {
@@ -213,5 +176,13 @@ public class MakeNegativeLogs {
 		return newTrace;
 	}
 	
-	
+	public static void main(final String... args) throws Exception {
+		DirectoryExperiment miner = new MakeNegativeLogs(
+				new File(Globals.poslogsdir),
+				"\\.xes$", 
+				new File(Globals.neglogsdir), 
+				true);
+		miner.go();
+		System.out.println("Experiment finished ---------------");
+	}
 }

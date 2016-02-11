@@ -1,8 +1,6 @@
 package discovery;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Random;
 
 import org.deckfour.xes.factory.XFactoryRegistry;
@@ -17,35 +15,25 @@ import org.processmining.plugins.kutoolbox.utils.ExportUtils;
 import org.processmining.plugins.kutoolbox.utils.FakePluginContext;
 import org.processmining.xeslite.external.XFactoryExternalStore;
 
+import experiment.DirectoryExperiment;
 import experiment.Globals;
 import experiment.Utils;
 
-public class AgnesMining {
-	public String inputLog;
-	public String outputModel;
-	public String outputTxt;
+public class AgnesMining extends DirectoryExperiment {
 	
-	public static File outputdir = new File(Globals.modelsdir + "agnesMiner\\");
-
-	public static void main(final String... args) throws Exception {
+	public AgnesMining(File directory, String pattern, File outputDirectory, boolean skipIfExists) {
+		super(directory, pattern, outputDirectory, skipIfExists);
 		XFactoryRegistry.instance().setCurrentDefault(new XFactoryExternalStore.MapDBDiskImpl());
-		outputdir.mkdirs();
-
-		for (File file : Utils.getDirectoryFiles(new File(Globals.poslogsdir), "\\.xes$")) {
-			AgnesMining miner = new AgnesMining();
-			miner.inputLog = file.getAbsolutePath();
-			miner.outputModel = outputdir.getAbsolutePath() + "\\" + file.getName().replace(".xes", ".pnml");
-			miner.outputTxt = outputdir.getAbsolutePath() + "\\" + file.getName().replace(".xes", ".txt");
-			System.out.println(miner.outputModel);
-			miner.run();
-		}
+		outputDirectory.mkdirs();
 	}
-	
-	public void run() throws OperationCancelledException, IOException {
-		PrintStream pos = new PrintStream(new FileOutputStream(outputTxt));
-	
+
+	@Override
+	public void run(File file, File outputDirectory, File outputTxt) {
+		String inputLog = file.getAbsolutePath();
+		String outputModel = outputDirectory.getAbsolutePath() + "/" + Utils.replaceExtension(file.getName(), "pnml");
+		
 		long time1 = System.currentTimeMillis();
-			
+		
 		XLog log = Utils.readLog(inputLog);
 		MinerUI parameters = new MinerUI(log);
 		MinerSettings settings = parameters.getSettings();
@@ -57,19 +45,34 @@ public class AgnesMining {
 		settings.includeParVar = false;
 		
 		long time2 = System.currentTimeMillis();
-			
-		Object[] results = AGNEsMinerPlugin.runMiner(new FakePluginContext(), log, settings);
 		long time3 = System.currentTimeMillis();
+		Object[] results;
+		try {
+			results = AGNEsMinerPlugin.runMiner(new FakePluginContext(), log, settings);
+			time3 = System.currentTimeMillis();
 			
-		Petrinet net = (Petrinet) results[0];
-		Marking mar = (Marking) results[1];
-		ExportUtils.exportPetriNet(net, mar, new File(outputModel));
+			Petrinet net = (Petrinet) results[0];
+			Marking mar = (Marking) results[1];
+			ExportUtils.exportPetriNet(net, mar, new File(outputModel));
+		} catch (OperationCancelledException | IOException e) {
+			e.printStackTrace();
+		}
 		
 		long time4 = System.currentTimeMillis();
 			
-		pos.println("Time to read log and setup: "+(time2-time1));
-		pos.println("Time to mine: "+(time3-time2));
-		pos.println("Time to save net: "+(time4-time3));				
-		pos.close();
+		Utils.writeLineToFile(outputTxt, "Time to read log and setup: "+(time2-time1));
+		Utils.writeLineToFile(outputTxt, "Time to mine: "+(time3-time2));
+		Utils.writeLineToFile(outputTxt, "Time to save net: "+(time4-time3));				
 	}
+
+	public static void main(final String... args) throws Exception {
+		DirectoryExperiment miner = new AgnesMining(
+				new File(Globals.poslogsdir),
+				"\\.xes$", 
+				new File(Globals.modelsdir + "agnesMiner\\"), 
+				true);
+		miner.go();
+		System.out.println("Experiment finished ---------------");
+	}
+	
 }

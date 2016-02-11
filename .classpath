@@ -80,5 +80,6 @@
 	<classpathentry kind="lib" path="lib/Widgets/lib/japura-1.12.3.jar"/>
 	<classpathentry kind="lib" path="lib/Widgets/Widgets.jar"/>
 	<classpathentry kind="lib" path="lib/kutools-extra.jar"/>
+	<classpathentry kind="lib" path="lib/loggenerator.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

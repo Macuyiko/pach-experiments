@@ -1,6 +1,9 @@
 package experiment;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,6 +17,7 @@ import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
 import org.processmining.plugins.kutoolbox.utils.ImportUtils;
+import org.processmining.plugins.kutoolbox.utils.LogUtils;
 
 public class Utils {
 	public static List<File> getDirectoryFiles(File dir) {
@@ -65,5 +69,36 @@ public class Utils {
 		for (XEvent event : trace)
 			tt += cl.getClassIdentity(event)+"____";
 		return tt;
+	}
+	
+	public static XLog mergeFolds(File logsdir, File currentFold, String pattern) {
+		String baseName = currentFold.getName().split("\\.")[0];
+		XLog merged = LogUtils.newLog(" -- positive folds except " + currentFold.getName());
+		for (File otherpos : Utils.getDirectoryFiles(logsdir, pattern)) {
+			if (otherpos.getName().equals(currentFold.getName())) continue;
+			if (!otherpos.getName().startsWith(baseName)) continue;
+			XLog other = Utils.readLog(otherpos.getAbsolutePath());
+			merged.addAll(other);
+		}
+		return merged;
+	}
+	
+	public static String getExtension(String path) {
+		String file = path.lastIndexOf("/") == -1 ? path : path.substring(path.lastIndexOf("/"));
+		return file.substring(file.indexOf("."));
+	}
+	
+	public static String replaceExtension(String path, String replacement) {
+		return path.replace(getExtension(path), "."+replacement);
+	}
+
+	public static void writeLineToFile(File file, String line) {
+		try {
+			PrintStream pos = new PrintStream(new FileOutputStream(file, true));
+			pos.println(line);
+			pos.close();
+		} catch (FileNotFoundException e) {
+			
+		}
 	}
 }
