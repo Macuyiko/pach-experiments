@@ -85,7 +85,7 @@ public class Utils {
 	
 	public static String getExtension(String path) {
 		String file = path.lastIndexOf("/") == -1 ? path : path.substring(path.lastIndexOf("/"));
-		return file.substring(file.indexOf("."));
+		return file.substring(file.lastIndexOf("."));
 	}
 	
 	public static String replaceExtension(String path, String replacement) {

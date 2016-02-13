@@ -81,5 +81,10 @@
 	<classpathentry kind="lib" path="lib/Widgets/Widgets.jar"/>
 	<classpathentry kind="lib" path="lib/kutools-extra.jar"/>
 	<classpathentry kind="lib" path="lib/loggenerator.jar"/>
+	<classpathentry kind="lib" path="lib/simmetrics.jar"/>
+	<classpathentry kind="lib" path="lib/yapetrinetreplayer.jar"/>
+	<classpathentry kind="lib" path="lib/PNetReplayer/PNetReplayer.jar"/>
+	<classpathentry kind="lib" path="lib/ETConformance/ETConformance.jar"/>
+	<classpathentry kind="lib" path="lib/EfficientStorage/EfficientStorage.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -3,10 +3,10 @@ package experiment;
 import java.io.File;
 
 public abstract class DirectoryExperiment {
-	private File directory;
-	private String pattern;
-	private File outputDirectory;
-	private boolean skipIfExists;
+	protected File directory;
+	protected String pattern;
+	protected File outputDirectory;
+	protected boolean skipIfExists;
 
 	public DirectoryExperiment(File directory, String pattern, 
 			File outputDirectory, boolean skipIfExists) {
@@ -19,7 +19,13 @@ public abstract class DirectoryExperiment {
 	public void go() {
 		for (File file : Utils.getDirectoryFiles(directory, pattern)) {
 			System.out.println(file.getName());
-			String outputTxt = outputDirectory.getAbsolutePath() + "/" + Utils.replaceExtension(file.getName(), "txt");
+			String outputTxt = null;
+			if (file.isDirectory()) {
+				outputTxt = file.getAbsolutePath() + "/" + file.getName() + ".txt";
+			} else {
+				outputTxt = outputDirectory.getAbsolutePath() + "/" + 
+					Utils.replaceExtension(file.getName(), "txt");
+			}
 			File outputTxtFile = new File(outputTxt);
 			
 			if (skipIfExists && outputTxtFile.exists()) {
