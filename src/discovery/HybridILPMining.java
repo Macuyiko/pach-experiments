@@ -8,6 +8,7 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.framework.boot.Boot;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Bootable;
+import org.processmining.hybridilpminer.algorithms.decorators.HybridILPDecoratorImpl;
 import org.processmining.hybridilpminer.parameters.LPObjectiveType;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.hybridilpminer.plugins.HybridILPMinerPlugin;
@@ -40,14 +41,16 @@ public class HybridILPMining extends DirectoryExperiment {
 
 	@Override
 	public void run(File file, File outputDirectory, File outputTxt) {
-		String outputModel = outputDirectory.getAbsolutePath() + "/" + Utils.replaceExtension(file.getName(), "pnml");
+		
+		String outputModel = outputDirectory.getAbsolutePath() + "/" + 
+				Utils.replaceExtension(file.getName(), "pnml");
 		
 		long time1 = System.currentTimeMillis();
 
 		XLog log = Utils.readLog(file.getAbsolutePath());
 		XLogHybridILPMinerParametersImpl config = new XLogHybridILPMinerParametersImpl(
 				context, log, XLogInfoImpl.STANDARD_CLASSIFIER);
-		config.setObjectiveType(LPObjectiveType.MINIMIZE_ARCS);
+		config.setObjectiveType(LPObjectiveType.WEIGHTED_ABSOLUTE_PARIKH);
 		
 		long time2 = System.currentTimeMillis();
 		
@@ -73,6 +76,8 @@ public class HybridILPMining extends DirectoryExperiment {
 	}
 
 	public static void main(final String... args) throws Exception {
+		HybridILPDecoratorImpl.USE_CUSTOM_SETUP = true;
+		
 		DirectoryExperiment miner = new HybridILPMining(
 				new File(Globals.poslogsdir),
 				"\\.xes$", 

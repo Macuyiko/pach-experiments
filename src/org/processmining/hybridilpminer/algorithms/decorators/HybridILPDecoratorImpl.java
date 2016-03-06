@@ -7,12 +7,18 @@ import org.processmining.lpengines.interfaces.LPEngine.VariableType;
 
 public class HybridILPDecoratorImpl<T extends HybridVariableMapping<Integer>> extends HybridLPDecoratorImpl<T> {
 
+	public static boolean USE_CUSTOM_SETUP = true;
+	
 	public HybridILPDecoratorImpl(T varMap, HybridILPMinerParametersImpl configuration,
 			LPLogAbstraction<?> logAbstraction) {
 		super(varMap, configuration, logAbstraction);
 	}
 
 	protected void setupVariables() {
+		if (!USE_CUSTOM_SETUP) {
+			super.setupVariables();
+			return;
+		}
 		System.err.println("Custom setupVars called");
 		engine.setType(varMap.getMarkingVariableLPIndex(), VariableType.BOOLEAN);
 		for (int i : varMap.getSingleVariableIndices()) {

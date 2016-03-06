@@ -2,6 +2,8 @@ package kfold;
 
 import java.io.File;
 
+import org.processmining.hybridilpminer.algorithms.decorators.HybridILPDecoratorImpl;
+
 import discovery.HybridILPMining;
 import experiment.DirectoryExperiment;
 import experiment.Globals;
@@ -21,6 +23,7 @@ public class FoldedHybridILPMining extends FoldedDirectoryMiner {
 	}
 
 	public static void main(final String... args) throws Exception {
+		HybridILPDecoratorImpl.USE_CUSTOM_SETUP = true;
 		FoldedDirectoryMiner miner = new FoldedHybridILPMining(
 				new File(Globals.poslogsdir),
 				"\\.xes$", 

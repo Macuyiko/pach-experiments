@@ -3,6 +3,7 @@ package experiment;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,24 @@ import org.processmining.plugins.kutoolbox.utils.ImportUtils;
 import org.processmining.plugins.kutoolbox.utils.LogUtils;
 
 public class Utils {
+	public static final String KILL = "taskkill /F /IM ";
+
+	public static void killProcess(String serviceName) {
+		// No risks, no idea if really necessary
+		try { Runtime.getRuntime().exec(KILL + serviceName.toLowerCase());
+		} catch (IOException e) {}
+		try { Runtime.getRuntime().exec(KILL + serviceName.toUpperCase());
+		} catch (IOException e) {}
+		try { Runtime.getRuntime().exec(KILL + serviceName.toLowerCase() + ".exe");
+		} catch (IOException e) {}
+		try { Runtime.getRuntime().exec(KILL + serviceName.toLowerCase() + ".EXE");
+		} catch (IOException e) {}
+		try { Runtime.getRuntime().exec(KILL + serviceName.toUpperCase() + ".exe");
+		} catch (IOException e) {}
+		try { Runtime.getRuntime().exec(KILL + serviceName.toUpperCase() + ".EXE");
+		} catch (IOException e) {}
+	}
+	
 	public static List<File> getDirectoryFiles(File dir) {
 		return getDirectoryFiles(dir, null);
 	}

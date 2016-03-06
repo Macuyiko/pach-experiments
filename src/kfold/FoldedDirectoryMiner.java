@@ -24,6 +24,7 @@ public abstract class FoldedDirectoryMiner extends DirectoryExperiment {
 
 	@Override
 	public void run(File file, File outputDirectory, File outputTxt) {
+		System.out.println(outputTxt.getName());
 		String baseName = file.getName().split("\\.")[0];
 		for (File pos : Utils.getDirectoryFiles(foldedLogsDir, "^"+baseName+"\\.pos\\.\\d\\.xes$")) {
 			File neg = new File(pos.getAbsolutePath().replace(".pos", ".neg"));
