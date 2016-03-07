@@ -49,7 +49,7 @@ public class NegativeChecking extends DirectoryExperiment {
 							add(logDirectory.getAbsolutePath());
 							add(outputTxt.getAbsolutePath());
 							add(pnml.getAbsolutePath());
-							}}, 600000 * 6 * 8);
+							}}, 600000 * 6);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

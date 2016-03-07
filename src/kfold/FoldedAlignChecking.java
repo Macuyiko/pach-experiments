@@ -1,4 +1,4 @@
-package conformance;
+package kfold;
 import java.io.File;
 import java.util.ArrayList;
 import org.deckfour.xes.factory.XFactoryRegistry;
@@ -10,9 +10,9 @@ import experiment.Globals;
 import experiment.Subprocess;
 import experiment.Utils;
 
-public class AlignChecking extends DirectoryExperiment {
+public class FoldedAlignChecking extends DirectoryExperiment {
 	
-	public AlignChecking(File directory, String pattern, File outputDirectory, boolean skipIfExists) {
+	public FoldedAlignChecking(File directory, String pattern, File outputDirectory, boolean skipIfExists) {
 		super(directory, pattern, outputDirectory, skipIfExists);
 		XFactoryRegistry.instance().setCurrentDefault(new XFactoryExternalStore.MapDBDiskImpl());
 		outputDirectory.mkdirs();
@@ -29,18 +29,20 @@ public class AlignChecking extends DirectoryExperiment {
 		if (this.skipIfExists && outputTxt.exists()) {
 			System.err.println("SKIPPING: "+modelDirectory.getName());
 		} else for (final File pnml : Utils.getDirectoryFiles(modelDirectory, "\\.pnml$")) {
+			// For each pnml, we use the allbut_x log to replay			
 			File logFile = new File(logDirectory.getAbsolutePath() + "/" +
 					Utils.replaceExtension(
 							pnml.getName()
+							.replace("allbut_", "")
 							.replace("_no_smt", "")
 							.replace("_smt_iter", "")
 							.replace("_smt_matrix", ""), "xes"));
-			
+			// allbut_a32.pos.0.pnml
+			// a32.pos.0.xes
 			if (!logFile.exists()) {
 				System.err.println("NOT FOUND: "+logFile.getName());
 				continue;
 			}
-			
 			try {
 				Subprocess.startSecondJVM(AlignCheckingMain.class, new ArrayList<String>(), 
 						new ArrayList<String>() {{
@@ -51,9 +53,7 @@ public class AlignChecking extends DirectoryExperiment {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
 		}
-		
 		// Recurse into subdirs
 		for (File pnml : Utils.getDirectoryFiles(modelDirectory, "")) {
 			runDir(pnml, logDirectory);
@@ -64,14 +64,12 @@ public class AlignChecking extends DirectoryExperiment {
 	public void run(File modelDirectory, File logDirectory, File outputTxt) {
 		runDir(modelDirectory, logDirectory);
 	}
-
-	
 	
 	public static void main(final String... args) throws Exception {
-		DirectoryExperiment miner = new AlignChecking(
-				new File(Globals.modelsdir), // Take care, this one starts from directories
+		DirectoryExperiment miner = new FoldedAlignChecking(
+				new File(Globals.basedir + "kfold/models/"), // Take care, this one starts from directories
 				"", 
-				new File(Globals.poslogsdir),// And takes logs from the outputdir
+				new File(Globals.basedir + "kfold/models/logs/"), // And takes logs from the outputdir
 				true);
 		miner.go();
 		System.out.println("Experiment finished ---------------");

@@ -7,4 +7,5 @@ public final class Globals {
 	public static final String poslogsdir = basedir + "logs\\";
 	public static final String neglogsdir = basedir + "negativeLogs\\";
 	public static final String modelsdir = basedir + "models\\";
+	public static final int NRFOLDS = 10;
 }

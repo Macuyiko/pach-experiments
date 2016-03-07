@@ -24,7 +24,7 @@ public class CreateFolds extends DirectoryExperiment {
 
 	@Override
 	public void run(File file, File outputDirectory, File outputTxt) {
-		int folds = 10;
+		int folds = Globals.NRFOLDS;
 		
 		
 		Random r = new Random();
