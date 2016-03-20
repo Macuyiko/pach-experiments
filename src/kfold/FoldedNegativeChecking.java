@@ -30,21 +30,6 @@ public class FoldedNegativeChecking extends DirectoryExperiment {
 		if (this.skipIfExists && outputTxt.exists()) {
 			System.err.println("SKIPPING: "+modelDirectory.getName());
 		} else for (final File pnml : Utils.getDirectoryFiles(modelDirectory, "\\.pnml$")) {
-			// For each pnml, we use the allbut_x log to replay			
-			File logFile = new File(logDirectory.getAbsolutePath() + "/" +
-					Utils.replaceExtension(
-							pnml.getName()
-							.replace("allbut_", "")
-							.replace("_no_smt", "")
-							.replace("_smt_iter", "")
-							.replace("_smt_matrix", ""), "xes"));
-			// allbut_a32.pos.0.pnml
-			// a32.pos.0.xes
-			if (!logFile.exists()) {
-				System.err.println("NOT FOUND: "+logFile.getName());
-				continue;
-			}
-			
 			try {
 				Subprocess.startSecondJVM(NegativeCheckingMain.class, new ArrayList<String>(), 
 						new ArrayList<String>() {{
@@ -72,7 +57,7 @@ public class FoldedNegativeChecking extends DirectoryExperiment {
 		DirectoryExperiment miner = new FoldedNegativeChecking(
 				new File(Globals.basedir + "kfold/models/"), // Take care, this one starts from directories
 				"", 
-				new File(Globals.basedir + "kfold/models/logs/"), // And takes logs from the outputdir
+				new File(Globals.basedir + "kfold/logs/"), // And takes logs from the outputdir
 				true);
 		miner.go();
 		System.out.println("Experiment finished ---------------");

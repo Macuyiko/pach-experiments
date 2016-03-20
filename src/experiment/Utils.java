@@ -17,6 +17,9 @@ import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.processmining.models.graphbased.directed.petrinet.Petrinet;
+import org.processmining.models.graphbased.directed.petrinet.elements.Place;
+import org.processmining.models.semantics.petrinet.Marking;
 import org.processmining.plugins.kutoolbox.utils.ImportUtils;
 import org.processmining.plugins.kutoolbox.utils.LogUtils;
 
@@ -102,6 +105,19 @@ public class Utils {
 		return merged;
 	}
 	
+	public static Marking removeDummyTokens(Petrinet net, Marking mar, String labelMatch) {
+		if (labelMatch == null)
+			labelMatch = "Dummy place";
+		Marking newMarking = new Marking();
+		for (Place p : net.getPlaces()) {
+			newMarking.add(p, mar.occurrences(p));
+			if (p.getLabel().contains(labelMatch)) {
+				newMarking.remove(p);
+			}
+		}
+		return newMarking;
+	}
+	
 	public static String getExtension(String path) {
 		String file = path.lastIndexOf("/") == -1 ? path : path.substring(path.lastIndexOf("/"));
 		return file.substring(file.lastIndexOf("."));
@@ -120,4 +136,6 @@ public class Utils {
 			
 		}
 	}
+	
+	
 }

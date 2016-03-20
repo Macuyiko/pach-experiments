@@ -34,6 +34,7 @@ public class NegativeCheckingMain {
 		File logFile = new File(logDirectory.getAbsolutePath() + "/" +
 				Utils.replaceExtension(
 						pnml.getName()
+						.replace("allbut_", "")
 						.replace("_no_smt", "")
 						.replace("_smt_iter", "")
 						.replace("_smt_matrix", ""), "xes"));

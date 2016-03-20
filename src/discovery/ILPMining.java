@@ -25,6 +25,7 @@ import org.processmining.plugins.ilpminer.ILPModelJavaILP;
 import org.processmining.plugins.ilpminer.ILPModelSettings;
 import org.processmining.plugins.ilpminer.PrefixClosedLanguage;
 import org.processmining.plugins.ilpminer.templates.PetriNetILPModelSettings;
+import org.processmining.plugins.ilpminer.templates.PureNetILPModelExtension;
 import org.processmining.plugins.ilpminer.templates.javailp.PetriNetILPModel;
 import org.processmining.plugins.kutoolbox.utils.ExportUtils;
 import org.processmining.plugins.kutoolbox.utils.FakePluginContext;
@@ -68,7 +69,7 @@ public class ILPMining extends DirectoryExperiment {
 		PrefixClosedLanguage l = new PrefixClosedLanguage(log, indices, classes);
 		Set<ILPMinerSolution> solutions;
 		Class<PetriNetILPModel> ILPVariant = PetriNetILPModel.class;
-		Class<?>[] ILPExtensions = new Class[] {};
+		Class<?>[] ILPExtensions = new Class[] { PureNetILPModelExtension.class };
 		PetriNetILPModelSettings modelSettings = new PetriNetILPModelSettings();
 		Map<SolverSetting, Object> solverSettings = new HashMap<SolverSetting, Object>();
 		solverSettings.put(SolverSetting.TYPE, SolverType.JAVAILP_LPSOLVE);
