@@ -86,5 +86,9 @@
 	<classpathentry kind="lib" path="lib/PNetReplayer/PNetReplayer.jar"/>
 	<classpathentry kind="lib" path="lib/ETConformance/ETConformance.jar"/>
 	<classpathentry kind="lib" path="lib/EfficientStorage/EfficientStorage.jar"/>
+	<classpathentry kind="lib" path="lib/Uma/Uma.jar"/>
+	<classpathentry kind="lib" path="lib/Uma/lib/antlr-runtime-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/Uma/lib/pnapi-java.jar"/>
+	<classpathentry kind="lib" path="lib/Uma/lib/uma.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
