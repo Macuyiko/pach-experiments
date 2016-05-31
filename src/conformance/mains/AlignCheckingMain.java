@@ -50,6 +50,7 @@ public class AlignCheckingMain {
 		File logFile = new File(logDirectory.getAbsolutePath() + "/" +
 				Utils.replaceExtension(
 						pnml.getName()
+						.replace(".enc", "")
 						.replace("allbut_", "")
 						.replace("_no_smt", "")
 						.replace("_smt_iter", "")
