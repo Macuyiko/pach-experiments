@@ -41,7 +41,13 @@ public class NegativeCheckingMain {
 						.replace("_smt_matrix", ""), "xes"));
 		
 		if (!logFile.exists()) {
-			System.err.println("NOT FOUND: "+logFile.getName());
+			System.err.println("NOT FOUND (1): "+logFile.getName());
+			logFile = new File(logFile.getAbsolutePath().replace(".xes", ".enc.xes"));
+			System.err.println("CHANGED: "+logFile.getName());
+		}
+			
+		if (!logFile.exists()) {
+			System.err.println("NOT FOUND (2): "+logFile.getName());
 			return;
 		}
 			

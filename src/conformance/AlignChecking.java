@@ -48,7 +48,10 @@ public class AlignChecking extends DirectoryExperiment {
 			}
 			
 			try {
-				Subprocess.startSecondJVM(AlignCheckingMain.class, new ArrayList<String>(), 
+				Subprocess.startSecondJVM(AlignCheckingMain.class, 
+						new ArrayList<String>() {{
+							add("-Xmx4G");
+						}}, 
 						new ArrayList<String>() {{
 							add(logDirectory.getAbsolutePath());
 							add(outputTxt.getAbsolutePath());

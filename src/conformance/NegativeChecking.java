@@ -39,17 +39,26 @@ public class NegativeChecking extends DirectoryExperiment {
 							.replace("_smt_matrix", ""), "xes"));
 			
 			if (!logFile.exists()) {
-				System.err.println("NOT FOUND: "+logFile.getName());
+				System.err.println("NOT FOUND (1): "+logFile.getName());
+				logFile = new File(logFile.getAbsolutePath().replace(".xes", ".enc.xes"));
+				System.err.println("CHANGED: "+logFile.getName());
+			}
+				
+			if (!logFile.exists()) {
+				System.err.println("NOT FOUND (2): "+logFile.getName());
 				continue;
 			}
 			
 			try {
-				Subprocess.startSecondJVM(NegativeCheckingMain.class, new ArrayList<String>(), 
+				Subprocess.startSecondJVM(NegativeCheckingMain.class, 
+						new ArrayList<String>() {{
+							add("-Xmx4G");
+						}},
 						new ArrayList<String>() {{
 							add(logDirectory.getAbsolutePath());
 							add(outputTxt.getAbsolutePath());
 							add(pnml.getAbsolutePath());
-							}}, 600000 * 6);
+							}}, 600000 * 12);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
