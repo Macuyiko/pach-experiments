@@ -26,8 +26,8 @@ import org.processmining.plugins.kutoolbox.utils.ImportUtils;
 import experiment.Globals;
 
 public class DebugSemanticalReplay {
-	private final static String modelfile = Globals.modelsdir + "/hybridilpmod_positiveonly/complex.enc.pnml";
-	private final static String logfile = Globals.poslogsdir + "/complex.enc.xes";
+	private final static String modelfile = Globals.basedir + "/pachTest/out/confdimblockingn.pnml";
+	private final static String logfile = Globals.basedir + "/pachTest/confdimblocking.pos.xes";
 	
 	public static void main(final String... args) throws OperationCancelledException, IOException {
 		XFactoryRegistry.instance().setCurrentDefault(new XFactoryNaiveImpl());

@@ -17,8 +17,8 @@ import org.processmining.plugins.yapetrinetreplayer.types.ReplayStateChain;
 import experiment.Globals;
 
 public class DebugExhaustiveReplay {
-	private final static String modelfile = Globals.modelsdir + "/hybridIlpMod_positiveonly/a32.pnml";
-	private final static String logfile = Globals.poslogsdir + "/a32.xes";
+	private final static String modelfile = Globals.modelsdir + "/with_negatives/ilp_uma-matrix/confdimblocking.pnml";
+	private final static String logfile = Globals.poslogsdir + "/confdimblocking.xes";
 	
 	public static void main(final String... args) throws OperationCancelledException, IOException {
 		XFactoryRegistry.instance().setCurrentDefault(new XFactoryNaiveImpl());
